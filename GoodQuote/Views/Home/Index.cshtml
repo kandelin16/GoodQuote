@@ -1,0 +1,97 @@
+﻿@{
+    ViewData["Title"] = "Good Quotes";
+}
+
+<div class="text-center">
+    <h2>My Digital Quote Book</h2>
+    <div class="row">
+        <div class="col-9">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Author</th>
+                        <th>Quote</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var quote in ViewBag.quotes)
+                    {
+                        <tr>
+                            <td>@quote.Author</td>
+                            <td>@quote.QuoteText</td>
+                            <td><button class="btn btn-primary" onclick="expandQuote(@quote.QuoteID);">Details</button></td>
+                        </tr>
+                        <tr id="hiddenQuote@(quote.QuoteID)" class="hiddenRow">
+                            <td colspan="3">
+                                <form asp-action="EditQuote" asp-controller="Home" method="post">
+                                    <input type="hidden" name="quoteID" value="@quote.QuoteID" />
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <td><input type="text" name="Author" value="@(quote.Author)" class="form-control enabler@(quote.QuoteID)" disabled></td>
+                                            <td><textarea name="QuoteText" class="form-control enabler@(quote.QuoteID)" disabled>@(quote.QuoteText)</textarea></td>
+                                            <td><input type="date" disabled name="quoteDate" class="form-control enabler@(quote.QuoteID)" value="@(quote.Date == DateTime.MinValue ? "No Date Added" : quote.Date.ToString("yyyy-MM-dd"))" /></td>
+                                            <td><input type="text" disabled name="Subject" class="form-control enabler@(quote.QuoteID)" value="@(quote.Subject == "" ? "No Subject Added" : quote.Subject)" /></td>
+                                            <td><input type="text" disabled name="citation" class="form-control enabler@(quote.QuoteID)" value="@(quote.Citation == "" ? "No Citation Added" : quote.Citation)" /></td>
+                                        </tr>
+                                    </table>
+                                    <div>
+                                        <button type="button" onclick="collapseQuote(@quote.QuoteID);" class="btn btn-secondary">Close Details</button>
+                                        <button type="button" class="btn btn-warning" onclick="enableEdit(@quote.QuoteID);" id="editButton@(quote.QuoteID)">Edit Quote</button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteQuote(@quote.QuoteID)">Delete Quote</button>
+                                        <button type="submit" class="btn btn-primary" id="saveButton@(quote.QuoteID)" hidden>Save Changes to Quote</button>
+                                    </div>
+                                </form>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-3">
+            <div class="btn btn-primary" onclick="revealAddForm();" id="addButton">
+                Add Quote
+            </div>
+            <div class="flexformHolder" id="flexformHolder">
+                <form asp-controller="Home" asp-action="AddQuote" method="post" id="quoteAddForm" class="flexform">
+                    <h2>New Quote Details:</h2>
+                    <label>Author Name</label>
+                    <input type="text" name="Author" class="form-control" />
+                    <label>Quote Text</label>
+                    <textarea name="QuoteText" class="form-control"></textarea>
+                    <label>Quote Date</label>
+                    <input type="date" class="form-control" name="quoteDate" />
+                    <label>Subject</label>
+                    <input type="text" name="Subject" class="form-control" />
+                    <label>Citation</label>
+                    <input type="text" name="citation" class="form-control" />
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit Quote</button>
+                        <button onclick="hideAddForm();" type="button" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<form asp-action="DeleteQuote" asp-controller="Home" id="deleteQuoteForm">
+    <input type="hidden" name="QuoteID" id="deleteFormQuoteID" />
+</form>
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content bg-gray">
+            <div class="modal-body">
+                <h2>Quote of The Day:</h2>
+                <p>@ViewBag.rando.QuoteText</p>
+                <p>- @ViewBag.rando.Author</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-secondary" asp-action="Index" asp-controller="Home" asp-route-visited="true">ok</a>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="showTheModal" value="@ViewBag.modal"/>
